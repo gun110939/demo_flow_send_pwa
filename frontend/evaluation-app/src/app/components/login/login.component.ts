@@ -98,4 +98,18 @@ export class LoginComponent implements OnInit {
       this.searchResults = [];
     }
   }
+
+  resetDemo(): void {
+    if (confirm('ต้องการรีเซ็ตข้อมูล Demo ทั้งหมดหรือไม่?\n\n- ผลงานทั้งหมดจะถูกลบ\n- คณะกรรมการจะถูก Random ใหม่\n- สร้างผลงานตัวอย่าง 10 ชิ้นใหม่')) {
+      this.apiService.resetData().subscribe({
+        next: () => {
+          alert('รีเซ็ตข้อมูลเรียบร้อยแล้ว\nพร้อมสำหรับ Demo ใหม่');
+          this.loadLoginOptions();
+        },
+        error: (err) => {
+          alert('เกิดข้อผิดพลาด: ' + err.message);
+        }
+      });
+    }
+  }
 }

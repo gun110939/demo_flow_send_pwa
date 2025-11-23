@@ -145,8 +145,15 @@
       }
     </div>
 
-    <div class="mt-4 text-center text-sm text-gray-500">
-      Demo System - ข้อมูลพนักงานจริง 8,915 คน
+    <div class="mt-4 text-center">
+      <p class="text-sm text-gray-500 mb-2">
+        Demo System - ข้อมูลพนักงานจริง 8,915 คน
+      </p>
+      <button
+        (click)="resetDemo()"
+        class="px-4 py-2 text-sm bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors">
+        รีเซ็ตข้อมูล Demo
+      </button>
     </div>
   </div>
 </div>
