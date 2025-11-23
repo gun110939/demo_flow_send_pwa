@@ -1,0 +1,121 @@
+<div class="min-h-screen bg-gray-100">
+  <!-- Header -->
+  <header class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold text-gray-900">ส่งผลงาน</h1>
+      <a routerLink="/dashboard" class="text-sm text-blue-600 hover:text-blue-800">
+        กลับหน้าหลัก
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 py-6">
+    @if (!submitted) {
+      <!-- Form -->
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4">ข้อมูลผลงาน</h2>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              ชื่อผลงาน <span class="text-red-500">*</span>
+            </label>
+            <input type="text"
+              [(ngModel)]="formData.title"
+              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="กรอกชื่อผลงาน">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              รายละเอียด
+            </label>
+            <textarea
+              [(ngModel)]="formData.description"
+              rows="4"
+              class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="กรอกรายละเอียดผลงาน"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chain Preview -->
+      @if (chain.length > 0) {
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 class="text-lg font-semibold mb-4">ลำดับการประเมิน</h2>
+          <div class="space-y-3">
+            @for (person of chain; track person.PERNR; let i = $index) {
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium"
+                  [class]="person.PERSK >= 10 ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'">
+                  {{ i + 1 }}
+                </div>
+                <div class="flex-1">
+                  <div class="font-medium">{{ person.ENAME }}</div>
+                  <div class="text-sm text-gray-500">{{ person.STELL }} (ระดับ {{ person.PERSK }})</div>
+                </div>
+                @if (person.PERSK >= 10) {
+                  <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                    ผู้บริหาร
+                  </span>
+                }
+              </div>
+            }
+            <div class="flex items-center gap-3 text-gray-500">
+              <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                <span class="text-green-800 text-xs">กก.</span>
+              </div>
+              <div>คณะกรรมการกลั่นกรอง → ลำดับสุดท้าย</div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Submit Button -->
+      <div class="flex justify-end">
+        <button
+          (click)="submit()"
+          [disabled]="!formData.title || submitting"
+          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+          @if (submitting) {
+            กำลังส่ง...
+          } @else {
+            ส่งผลงาน
+          }
+        </button>
+      </div>
+    }
+
+    @if (submitted && result) {
+      <!-- Success -->
+      <div class="bg-white rounded-lg shadow p-6 text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <h2 class="text-xl font-semibold text-green-600 mb-2">ส่งผลงานเรียบร้อยแล้ว</h2>
+        <p class="text-gray-600 mb-4">{{ result.title }}</p>
+
+        @if (result.nextEvaluator) {
+          <div class="bg-gray-50 rounded-lg p-4 mb-4">
+            <p class="text-sm text-gray-500">ผู้ประเมินลำดับถัดไป:</p>
+            <p class="font-medium">{{ result.nextEvaluator.ENAME }}</p>
+            <p class="text-sm text-gray-500">{{ result.nextEvaluator.STELL }}</p>
+          </div>
+        }
+
+        <div class="flex justify-center gap-4">
+          <a routerLink="/dashboard"
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+            กลับหน้าหลัก
+          </a>
+          <a [routerLink]="['/work-detail', result.id]"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            ดูรายละเอียด
+          </a>
+        </div>
+      </div>
+    }
+  </main>
+</div>
