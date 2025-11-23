@@ -5,6 +5,7 @@ import { SubmitWorkComponent } from './components/submit-work/submit-work.compon
 import { PendingEvaluationsComponent } from './components/pending-evaluations/pending-evaluations.component';
 import { EvaluateComponent } from './components/evaluate/evaluate.component';
 import { WorkDetailComponent } from './components/work-detail/work-detail.component';
+import { CommitteeManagementComponent } from './components/committee-management/committee-management.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -13,5 +14,6 @@ export const routes: Routes = [
   { path: 'submit-work', component: SubmitWorkComponent },
   { path: 'pending-evaluations', component: PendingEvaluationsComponent },
   { path: 'evaluate/:id', component: EvaluateComponent },
-  { path: 'work-detail/:id', component: WorkDetailComponent }
+  { path: 'work-detail/:id', component: WorkDetailComponent },
+  { path: 'committee-management', component: CommitteeManagementComponent }
 ];

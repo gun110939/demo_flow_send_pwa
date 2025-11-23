@@ -24,6 +24,12 @@ export class SubmitWorkComponent implements OnInit {
     description: ''
   };
 
+  // Committee check
+  hasCommittee = true;
+  committeeSuggestions: any[] = [];
+  showCommitteeWarning = false;
+  addingCommittee = false;
+
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
@@ -37,6 +43,52 @@ export class SubmitWorkComponent implements OnInit {
       return;
     }
     this.loadChain();
+    this.checkCommitteeCoverage();
+  }
+
+  checkCommitteeCoverage(): void {
+    if (!this.currentUser?.PARENTORG) return;
+
+    this.apiService.checkCommitteeCoverage(this.currentUser.PARENTORG).subscribe({
+      next: (data) => {
+        this.hasCommittee = data.hasCommittee;
+        if (!this.hasCommittee) {
+          this.loadCommitteeSuggestions();
+        }
+      }
+    });
+  }
+
+  loadCommitteeSuggestions(): void {
+    if (!this.currentUser?.PARENTORG) return;
+
+    this.apiService.getCommitteeSuggestions(this.currentUser.PARENTORG).subscribe({
+      next: (data) => {
+        this.committeeSuggestions = data.filter((e: any) => !e.isAlreadyCommittee);
+      }
+    });
+  }
+
+  addCommitteeMember(employee: any): void {
+    if (!this.currentUser) return;
+
+    this.addingCommittee = true;
+    this.apiService.addCommitteeMember({
+      employeePernr: employee.PERNR,
+      committeeStage: 'PRE_FINAL',
+      parentorgFilter: this.currentUser.PARENTORG
+    }).subscribe({
+      next: () => {
+        this.hasCommittee = true;
+        this.showCommitteeWarning = false;
+        this.addingCommittee = false;
+        alert(`เพิ่ม ${employee.ENAME} เป็นคณะกรรมการกลั่นกรองเรียบร้อยแล้ว`);
+      },
+      error: (err) => {
+        this.addingCommittee = false;
+        alert('เกิดข้อผิดพลาด: ' + (err.error?.error || err.message));
+      }
+    });
   }
 
   loadChain(): void {
@@ -56,7 +108,21 @@ export class SubmitWorkComponent implements OnInit {
   submit(): void {
     if (!this.currentUser || !this.formData.title) return;
 
+    // Check committee coverage first
+    if (!this.hasCommittee) {
+      this.showCommitteeWarning = true;
+      return;
+    }
+
+    this.doSubmit();
+  }
+
+  doSubmit(): void {
+    if (!this.currentUser) return;
+
     this.submitting = true;
+    this.showCommitteeWarning = false;
+
     this.apiService.createWorkResult({
       employeePernr: this.currentUser.PERNR,
       title: this.formData.title,
@@ -72,5 +138,9 @@ export class SubmitWorkComponent implements OnInit {
         this.submitting = false;
       }
     });
+  }
+
+  closeWarning(): void {
+    this.showCommitteeWarning = false;
   }
 }

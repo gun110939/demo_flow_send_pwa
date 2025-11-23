@@ -73,7 +73,7 @@
     </div>
 
     <!-- Quick Actions -->
-    <div class="grid md:grid-cols-2 gap-6 mb-6">
+    <div class="grid md:grid-cols-3 gap-6 mb-6">
       <!-- Submit Work -->
       <a routerLink="/submit-work"
         class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow block">
@@ -90,6 +90,13 @@
             มี {{ userStats.pendingEvaluations }} รายการรอประเมิน
           }
         </p>
+      </a>
+
+      <!-- Committee Management -->
+      <a routerLink="/committee-management"
+        class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow block">
+        <h3 class="text-lg font-semibold text-purple-600 mb-2">จัดการคณะกรรมการ</h3>
+        <p class="text-sm text-gray-600">เพิ่ม/ลบ คณะกรรมการกลั่นกรองและลำดับสุดท้าย</p>
       </a>
     </div>
 

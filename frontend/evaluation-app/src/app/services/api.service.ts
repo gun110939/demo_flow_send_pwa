@@ -69,6 +69,26 @@ export class ApiService {
     return this.http.get(url);
   }
 
+  addCommitteeMember(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/committee`, data);
+  }
+
+  removeCommitteeMember(id: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/committee/${id}`);
+  }
+
+  getCommitteeSuggestions(parentorg: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/committee/suggestions/${encodeURIComponent(parentorg)}`);
+  }
+
+  checkCommitteeCoverage(parentorg: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/committee/check/${encodeURIComponent(parentorg)}`);
+  }
+
+  getAllCommitteeCoverage(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/committee/coverage`);
+  }
+
   // Dashboard
   getDashboardStats(): Observable<any> {
     return this.http.get(`${this.baseUrl}/dashboard/stats`);

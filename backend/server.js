@@ -511,6 +511,115 @@ app.get('/api/committee', (req, res) => {
   res.json(enriched);
 });
 
+// Add committee member
+app.post('/api/committee', (req, res) => {
+  const { employeePernr, committeeStage, parentorgFilter } = req.body;
+  const employee = employeeMap.get(parseInt(employeePernr));
+
+  if (!employee) {
+    return res.status(404).json({ error: 'Employee not found' });
+  }
+
+  // Check if already a committee member in this stage
+  const existing = committeeMembers.find(c =>
+    c.employeePernr === parseInt(employeePernr) &&
+    c.committeeStage === committeeStage
+  );
+
+  if (existing) {
+    return res.status(400).json({ error: 'Already a committee member in this stage' });
+  }
+
+  const newMember = {
+    id: uuidv4(),
+    employeePernr: parseInt(employeePernr),
+    committeeStage,
+    parentorgFilter: committeeStage === 'PRE_FINAL' ? (parentorgFilter || employee.PARENTORG) : null
+  };
+
+  committeeMembers.push(newMember);
+
+  res.json({
+    ...newMember,
+    employee
+  });
+});
+
+// Remove committee member
+app.delete('/api/committee/:id', (req, res) => {
+  const index = committeeMembers.findIndex(c => c.id === req.params.id);
+
+  if (index === -1) {
+    return res.status(404).json({ error: 'Committee member not found' });
+  }
+
+  committeeMembers.splice(index, 1);
+  res.json({ message: 'Committee member removed' });
+});
+
+// Get suggested employees for committee (by PARENTORG)
+app.get('/api/committee/suggestions/:parentorg', (req, res) => {
+  const parentorg = decodeURIComponent(req.params.parentorg);
+
+  // Get employees from same PARENTORG with level 8-11
+  const suggestions = employees
+    .filter(e => e.PARENTORG === parentorg && e.PERSK >= 8 && e.PERSK <= 11)
+    .map(e => ({
+      ...e,
+      isAlreadyCommittee: committeeMembers.some(c => c.employeePernr === e.PERNR)
+    }))
+    .sort((a, b) => b.PERSK - a.PERSK); // Sort by level descending
+
+  res.json(suggestions);
+});
+
+// Check if PARENTORG has pre-final committee
+app.get('/api/committee/check/:parentorg', (req, res) => {
+  const parentorg = decodeURIComponent(req.params.parentorg);
+
+  const hasCommittee = committeeMembers.some(c =>
+    c.committeeStage === 'PRE_FINAL' &&
+    c.parentorgFilter === parentorg
+  );
+
+  const committee = committeeMembers.find(c =>
+    c.committeeStage === 'PRE_FINAL' &&
+    c.parentorgFilter === parentorg
+  );
+
+  res.json({
+    hasCommittee,
+    committee: committee ? {
+      ...committee,
+      employee: employeeMap.get(committee.employeePernr)
+    } : null
+  });
+});
+
+// Get all unique PARENTORGs with their committee status
+app.get('/api/committee/coverage', (req, res) => {
+  const parentOrgs = [...new Set(employees.map(e => e.PARENTORG).filter(p => p))];
+
+  const coverage = parentOrgs.map(org => {
+    const committee = committeeMembers.find(c =>
+      c.committeeStage === 'PRE_FINAL' &&
+      c.parentorgFilter === org
+    );
+
+    return {
+      parentorg: org,
+      hasCommittee: !!committee,
+      committee: committee ? {
+        ...committee,
+        employee: employeeMap.get(committee.employeePernr)
+      } : null,
+      employeeCount: employees.filter(e => e.PARENTORG === org).length
+    };
+  }).sort((a, b) => a.parentorg.localeCompare(b.parentorg));
+
+  res.json(coverage);
+});
+
 // Get dashboard stats
 app.get('/api/dashboard/stats', (req, res) => {
   const stats = {
