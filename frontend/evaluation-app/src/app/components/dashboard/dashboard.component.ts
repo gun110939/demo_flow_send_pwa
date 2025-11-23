@@ -14,6 +14,7 @@ export class DashboardComponent implements OnInit {
   currentUser: User | null = null;
   userStats: any = null;
   globalStats: any = null;
+  allWorkResults: any[] = [];
   loading = true;
 
   constructor(
@@ -29,6 +30,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
     this.loadStats();
+    this.loadAllWorkResults();
   }
 
   loadStats(): void {
@@ -51,6 +53,47 @@ export class DashboardComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  loadAllWorkResults(): void {
+    this.apiService.getWorkResults().subscribe({
+      next: (data) => {
+        this.allWorkResults = data;
+      }
+    });
+  }
+
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'PENDING': return 'รอดำเนินการ';
+      case 'APPROVED': return 'อนุมัติแล้ว';
+      case 'REJECTED': return 'ไม่อนุมัติ';
+      default: return status;
+    }
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'APPROVED': return 'bg-green-100 text-green-800';
+      case 'REJECTED': return 'bg-red-100 text-red-800';
+      default: return 'bg-yellow-100 text-yellow-800';
+    }
+  }
+
+  getStageLabel(stage: string): string {
+    switch (stage) {
+      case 'PRE_FINAL': return 'คณะกรรมการกลั่นกรอง';
+      case 'FINAL': return 'คณะกรรมการลำดับสุดท้าย';
+      default: return 'สายบังคับบัญชา';
+    }
+  }
+
+  getStageClass(stage: string): string {
+    switch (stage) {
+      case 'PRE_FINAL': return 'bg-green-100 text-green-800';
+      case 'FINAL': return 'bg-purple-100 text-purple-800';
+      default: return 'bg-blue-100 text-blue-800';
+    }
   }
 
   logout(): void {

@@ -118,6 +118,80 @@
       </div>
     }
 
+    <!-- All Work Results -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 class="text-lg font-semibold mb-4">รายการผลงานทั้งหมด ({{ allWorkResults.length }} ชิ้น)</h2>
+
+      @if (allWorkResults.length > 0) {
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left font-medium text-gray-600">ผลงาน</th>
+                <th class="px-4 py-3 text-left font-medium text-gray-600">ผู้ส่ง</th>
+                <th class="px-4 py-3 text-center font-medium text-gray-600">สถานะ</th>
+                <th class="px-4 py-3 text-center font-medium text-gray-600">ขั้นตอน</th>
+                <th class="px-4 py-3 text-left font-medium text-gray-600">รอประเมินจาก</th>
+                <th class="px-4 py-3 text-center font-medium text-gray-600">ประเมินแล้ว</th>
+                <th class="px-4 py-3 text-center font-medium text-gray-600"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y">
+              @for (work of allWorkResults; track work.id) {
+                <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-3">
+                    <div class="font-medium">{{ work.title }}</div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div>{{ work.employee?.ENAME }}</div>
+                    <div class="text-xs text-gray-500">{{ work.employee?.PARENTORG }}</div>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="px-2 py-1 text-xs rounded-full" [class]="getStatusClass(work.status)">
+                      {{ getStatusLabel(work.status) }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span class="px-2 py-1 text-xs rounded-full" [class]="getStageClass(work.committeeStage)">
+                      {{ getStageLabel(work.committeeStage) }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3">
+                    @if (work.status === 'PENDING') {
+                      @if (work.currentEvaluator) {
+                        <div>{{ work.currentEvaluator.ENAME }}</div>
+                        <div class="text-xs text-gray-500">รหัส: {{ work.currentEvaluator.PERNR }}</div>
+                      } @else {
+                        <span class="text-gray-500">{{ getStageLabel(work.committeeStage) }}</span>
+                      }
+                    } @else {
+                      <span class="text-gray-400">-</span>
+                    }
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    {{ work.evaluationCount }} ครั้ง
+                    @if (work.score) {
+                      <div class="text-xs text-purple-600">{{ work.score }}/100</div>
+                    }
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <a [routerLink]="['/work-detail', work.id]"
+                      class="text-blue-600 hover:text-blue-800 text-xs">
+                      ดูรายละเอียด
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="text-center py-8 text-gray-500">
+          ยังไม่มีผลงานในระบบ
+        </div>
+      }
+    </div>
+
     <!-- Reset Button -->
     <div class="text-center">
       <button (click)="resetDemo()"
