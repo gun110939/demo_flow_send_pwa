@@ -1,0 +1,129 @@
+<div class="min-h-screen bg-gray-100">
+  <!-- Header -->
+  <header class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold text-gray-900">ระบบประเมินผลงาน</h1>
+      <div class="flex items-center gap-4">
+        @if (currentUser) {
+          <span class="text-sm text-gray-600">
+            {{ currentUser.ENAME }}
+            @if (currentUser.committeeRole) {
+              <span class="ml-1 px-2 py-0.5 text-xs rounded-full"
+                [class]="currentUser.committeeRole === 'FINAL'
+                  ? 'bg-purple-100 text-purple-800'
+                  : 'bg-green-100 text-green-800'">
+                {{ currentUser.committeeRole === 'FINAL' ? 'ลำดับสุดท้าย' : 'กลั่นกรอง' }}
+              </span>
+            }
+          </span>
+        }
+        <button (click)="logout()" class="text-sm text-red-600 hover:text-red-800">
+          ออกจากระบบ
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6">
+    <!-- User Info -->
+    @if (userStats) {
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4">ข้อมูลผู้ใช้</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <div>
+            <span class="text-gray-500">รหัส:</span>
+            <span class="ml-2 font-medium">{{ userStats.employee.PERNR }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500">ระดับ:</span>
+            <span class="ml-2 font-medium">{{ userStats.employee.PERSK }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500">ตำแหน่ง:</span>
+            <span class="ml-2 font-medium">{{ userStats.employee.STELL }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500">กอง/เขต:</span>
+            <span class="ml-2 font-medium">{{ userStats.employee.PARENTORG || '-' }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      @if (userStats) {
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="text-2xl font-bold text-blue-600">{{ userStats.pendingEvaluations }}</div>
+          <div class="text-sm text-gray-600">รอประเมิน</div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="text-2xl font-bold text-green-600">{{ userStats.myWorkResults.approved }}</div>
+          <div class="text-sm text-gray-600">ผลงานอนุมัติ</div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="text-2xl font-bold text-yellow-600">{{ userStats.myWorkResults.pending }}</div>
+          <div class="text-sm text-gray-600">ผลงานรอดำเนินการ</div>
+        </div>
+        <div class="bg-white rounded-lg shadow p-4">
+          <div class="text-2xl font-bold text-gray-600">{{ userStats.totalEvaluationsDone }}</div>
+          <div class="text-sm text-gray-600">ประเมินแล้ว</div>
+        </div>
+      }
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid md:grid-cols-2 gap-6 mb-6">
+      <!-- Submit Work -->
+      <a routerLink="/submit-work"
+        class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow block">
+        <h3 class="text-lg font-semibold text-blue-600 mb-2">ส่งผลงาน</h3>
+        <p class="text-sm text-gray-600">ส่งผลงานเข้าระบบประเมิน</p>
+      </a>
+
+      <!-- Pending Evaluations -->
+      <a routerLink="/pending-evaluations"
+        class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow block">
+        <h3 class="text-lg font-semibold text-green-600 mb-2">รายการรอประเมิน</h3>
+        <p class="text-sm text-gray-600">
+          @if (userStats) {
+            มี {{ userStats.pendingEvaluations }} รายการรอประเมิน
+          }
+        </p>
+      </a>
+    </div>
+
+    <!-- Global Stats -->
+    @if (globalStats) {
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4">สถิติระบบ</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="text-center p-3 bg-gray-50 rounded">
+            <div class="text-xl font-bold">{{ globalStats.totalEmployees }}</div>
+            <div class="text-xs text-gray-500">พนักงานทั้งหมด</div>
+          </div>
+          <div class="text-center p-3 bg-blue-50 rounded">
+            <div class="text-xl font-bold text-blue-600">{{ globalStats.totalWorkResults }}</div>
+            <div class="text-xs text-gray-500">ผลงานทั้งหมด</div>
+          </div>
+          <div class="text-center p-3 bg-green-50 rounded">
+            <div class="text-xl font-bold text-green-600">{{ globalStats.approved }}</div>
+            <div class="text-xs text-gray-500">อนุมัติแล้ว</div>
+          </div>
+          <div class="text-center p-3 bg-yellow-50 rounded">
+            <div class="text-xl font-bold text-yellow-600">{{ globalStats.inPreFinal + globalStats.inFinal }}</div>
+            <div class="text-xs text-gray-500">อยู่ในคณะกรรมการ</div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Reset Button -->
+    <div class="text-center">
+      <button (click)="resetDemo()"
+        class="text-sm text-gray-500 hover:text-red-600">
+        รีเซ็ตข้อมูล Demo
+      </button>
+    </div>
+  </main>
+</div>

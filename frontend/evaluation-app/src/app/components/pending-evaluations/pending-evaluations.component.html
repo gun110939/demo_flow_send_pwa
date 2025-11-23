@@ -1,0 +1,99 @@
+<div class="min-h-screen bg-gray-100">
+  <!-- Header -->
+  <header class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold text-gray-900">รายการรอประเมิน</h1>
+      <a routerLink="/dashboard" class="text-sm text-blue-600 hover:text-blue-800">
+        กลับหน้าหลัก
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-6">
+    <!-- User Role Info -->
+    @if (currentUser?.committeeRole) {
+      <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-gray-600">คุณกำลังดูในฐานะ:</span>
+          <span class="px-2 py-1 text-sm rounded-full"
+            [class]="currentUser?.committeeRole === 'FINAL'
+              ? 'bg-purple-100 text-purple-800'
+              : 'bg-green-100 text-green-800'">
+            {{ currentUser?.committeeRole === 'FINAL' ? 'คณะกรรมการลำดับสุดท้าย' : 'คณะกรรมการกลั่นกรอง' }}
+          </span>
+        </div>
+      </div>
+    }
+
+    <!-- Loading -->
+    @if (loading) {
+      <div class="text-center py-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <p class="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
+      </div>
+    }
+
+    <!-- Work Results List -->
+    @if (!loading && workResults.length > 0) {
+      <div class="space-y-4">
+        @for (work of workResults; track work.id) {
+          <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <h3 class="font-semibold text-lg">{{ work.title }}</h3>
+                <p class="text-sm text-gray-500">
+                  โดย {{ work.employee.ENAME }} ({{ work.employee.STELL }})
+                </p>
+              </div>
+              <span class="px-2 py-1 text-xs rounded-full" [class]="getStageClass(work.committeeStage)">
+                {{ getStageLabel(work.committeeStage) }}
+              </span>
+            </div>
+
+            <div class="text-sm text-gray-600 mb-4">
+              <p><span class="text-gray-500">กอง/เขต:</span> {{ work.employee.PARENTORG || '-' }}</p>
+              <p><span class="text-gray-500">ประเมินแล้ว:</span> {{ work.evaluationCount }} ครั้ง</p>
+              @if (work.score) {
+                <p><span class="text-gray-500">คะแนน:</span> {{ work.score }}/100</p>
+              }
+            </div>
+
+            <!-- Evaluation History Preview -->
+            @if (work.evaluations && work.evaluations.length > 0) {
+              <div class="bg-gray-50 rounded p-3 mb-4">
+                <p class="text-xs text-gray-500 mb-2">ประวัติการประเมิน:</p>
+                @for (eval of work.evaluations; track eval.id) {
+                  <div class="text-sm">
+                    <span class="font-medium">{{ eval.evaluator?.ENAME }}</span>
+                    <span class="text-green-600 ml-2">อนุมัติ</span>
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="flex justify-end">
+              <a [routerLink]="['/evaluate', work.id]"
+                class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+                ประเมินผลงาน
+              </a>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Empty -->
+    @if (!loading && workResults.length === 0) {
+      <div class="bg-white rounded-lg shadow p-8 text-center">
+        <div class="text-gray-400 mb-4">
+          <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+          </svg>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">ไม่มีรายการรอประเมิน</h3>
+        <p class="text-gray-500">คุณได้ประเมินผลงานทั้งหมดแล้ว</p>
+      </div>
+    }
+  </main>
+</div>

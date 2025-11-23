@@ -1,0 +1,75 @@
+<div class="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4">
+  <div class="max-w-4xl w-full">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">ระบบประเมินผลงาน</h1>
+      <p class="mt-2 text-gray-600">เลือกพนักงานเพื่อเข้าสู่ระบบ (Demo Mode)</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <!-- Category Tabs -->
+      <div class="flex flex-wrap gap-2 mb-6">
+        @for (cat of categories; track cat.key) {
+          <button
+            (click)="selectedCategory = cat.key"
+            [class]="selectedCategory === cat.key
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            {{ cat.label }}
+          </button>
+        }
+      </div>
+
+      <!-- Loading -->
+      @if (loading) {
+        <div class="text-center py-8">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p class="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
+        </div>
+      }
+
+      <!-- User List -->
+      @if (!loading && getCurrentList().length > 0) {
+        <div class="grid gap-3">
+          @for (user of getCurrentList(); track user.PERNR) {
+            <button
+              (click)="selectUser(user)"
+              class="w-full text-left p-4 border rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-semibold text-gray-900">{{ user.ENAME }}</div>
+                  <div class="text-sm text-gray-600">{{ user.STELL }}</div>
+                  <div class="text-xs text-gray-500 mt-1">
+                    รหัส: {{ user.PERNR }} | ระดับ: {{ user.PERSK }}
+                    @if (user.PARENTORG) {
+                      | {{ user.PARENTORG }}
+                    }
+                  </div>
+                </div>
+                @if (user.committeeRole) {
+                  <span class="px-2 py-1 text-xs rounded-full"
+                    [class]="user.committeeRole === 'FINAL'
+                      ? 'bg-purple-100 text-purple-800'
+                      : 'bg-green-100 text-green-800'">
+                    {{ user.committeeRole === 'FINAL' ? 'ลำดับสุดท้าย' : 'กลั่นกรอง' }}
+                  </span>
+                }
+              </div>
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Empty -->
+      @if (!loading && getCurrentList().length === 0) {
+        <div class="text-center py-8 text-gray-500">
+          ไม่พบข้อมูลในหมวดนี้
+        </div>
+      }
+    </div>
+
+    <div class="mt-4 text-center text-sm text-gray-500">
+      Demo System - ข้อมูลพนักงานจริง 8,915 คน
+    </div>
+  </div>
+</div>

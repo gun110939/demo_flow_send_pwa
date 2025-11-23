@@ -1,0 +1,140 @@
+<div class="min-h-screen bg-gray-100">
+  <!-- Header -->
+  <header class="bg-white shadow">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold text-gray-900">รายละเอียดผลงาน</h1>
+      <a routerLink="/dashboard" class="text-sm text-blue-600 hover:text-blue-800">
+        กลับหน้าหลัก
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 py-6">
+    <!-- Loading -->
+    @if (loading) {
+      <div class="text-center py-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+      </div>
+    }
+
+    @if (!loading && workResult) {
+      <!-- Status Badge -->
+      <div class="flex justify-between items-center mb-6">
+        <span class="px-3 py-1 rounded-full text-sm font-medium" [class]="getStatusClass(workResult.status)">
+          {{ getStatusLabel(workResult.status) }}
+        </span>
+        @if (workResult.score) {
+          <span class="text-lg font-bold">
+            คะแนน: {{ workResult.score }}/100
+          </span>
+        }
+      </div>
+
+      <!-- Work Info -->
+      <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">{{ workResult.title }}</h2>
+
+        <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+          <div>
+            <span class="text-gray-500">ผู้ส่ง:</span>
+            <span class="ml-2 font-medium">{{ workResult.employee.ENAME }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500">ตำแหน่ง:</span>
+            <span class="ml-2">{{ workResult.employee.STELL }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500">ระดับ:</span>
+            <span class="ml-2">{{ workResult.employee.PERSK }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500">กอง/เขต:</span>
+            <span class="ml-2">{{ workResult.employee.PARENTORG || '-' }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500">วันที่ส่ง:</span>
+            <span class="ml-2">{{ workResult.submittedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <div>
+            <span class="text-gray-500">ขั้นตอน:</span>
+            <span class="ml-2">{{ getStageLabel(workResult.committeeStage) }}</span>
+          </div>
+        </div>
+
+        @if (workResult.description) {
+          <div class="bg-gray-50 rounded p-3">
+            <p class="text-sm text-gray-500 mb-1">รายละเอียด:</p>
+            <p class="text-sm">{{ workResult.description }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Evaluation History -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold mb-4">ประวัติการประเมิน</h3>
+
+        @if (workResult.evaluations && workResult.evaluations.length > 0) {
+          <div class="space-y-4">
+            @for (eval of workResult.evaluations; track eval.id) {
+              <div class="border-l-4 pl-4"
+                [class]="eval.status === 'APPROVED' ? 'border-green-500' : 'border-red-500'">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <div class="font-medium">{{ eval.evaluator?.ENAME }}</div>
+                    <div class="text-sm text-gray-500">
+                      {{ eval.evaluator?.STELL }} (ระดับ {{ eval.evaluatorLevel }})
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-sm px-2 py-1 rounded"
+                      [class]="eval.status === 'APPROVED'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'">
+                      {{ eval.status === 'APPROVED' ? 'อนุมัติ' : 'ไม่อนุมัติ' }}
+                    </span>
+                    @if (eval.score) {
+                      <div class="text-sm font-medium mt-1">{{ eval.score }}/100</div>
+                    }
+                  </div>
+                </div>
+                @if (eval.comments) {
+                  <div class="mt-2 text-sm text-gray-600 bg-gray-50 rounded p-2">
+                    {{ eval.comments }}
+                  </div>
+                }
+                <div class="text-xs text-gray-400 mt-1">
+                  {{ eval.evaluatedAt | date:'dd/MM/yyyy HH:mm' }}
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="text-gray-500 text-center py-4">ยังไม่มีการประเมิน</p>
+        }
+
+        <!-- Current Status -->
+        @if (workResult.status === 'PENDING') {
+          <div class="mt-4 pt-4 border-t">
+            @if (workResult.currentEvaluator) {
+              <p class="text-sm text-gray-600">
+                <span class="font-medium">รอการประเมินจาก:</span>
+                {{ workResult.currentEvaluator.ENAME }} ({{ workResult.currentEvaluator.STELL }})
+              </p>
+            } @else {
+              <p class="text-sm text-gray-600">
+                <span class="font-medium">รอการประเมินจาก:</span>
+                {{ getStageLabel(workResult.committeeStage) }}
+              </p>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (!loading && !workResult) {
+      <div class="bg-white rounded-lg shadow p-8 text-center">
+        <p class="text-gray-500">ไม่พบข้อมูลผลงาน</p>
+      </div>
+    }
+  </main>
+</div>
